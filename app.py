@@ -2,9 +2,24 @@ import pickle
 import streamlit as st
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
+import pandas as pd
+import numpy as np
 
 CLIENT_ID = "eb6a3de8147842788ca4572b06728b08"
 CLIENT_SECRET = "ffed6e5600e24157ada66d2dae3c1773"
+
+# สร้างไฟล์ df.pkl
+data = {
+    'song': ['Song1', 'Song2', 'Song3', 'Song4', 'Song5'],
+    'artist': ['Artist1', 'Artist2', 'Artist3', 'Artist4', 'Artist5']
+}
+df = pd.DataFrame(data)
+df.to_pickle('C:/JN/data/df.pkl')
+
+# สร้างไฟล์ similarity.pkl
+similarity = np.random.rand(5, 5)
+with open('C:/JN/data/similarity.pkl', 'wb') as f:
+    pickle.dump(similarity, f)
 
 # Initialize the Spotify client
 client_credentials_manager = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
@@ -28,7 +43,6 @@ def recommend(song):
     recommended_music_names = []
     recommended_music_posters = []
     for i in distances[1:6]:
-        # fetch the movie poster
         artist = music.iloc[i[0]].artist
         print(artist)
         print(music.iloc[i[0]].song)
