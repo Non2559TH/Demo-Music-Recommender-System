@@ -5,52 +5,29 @@ import pickle
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import os
-from sklearn.metrics.pairwise import cosine_similarity
 
-# กำหนด CLIENT_ID และ CLIENT_SECRET ของคุณ
-CLIENT_ID = "eb6a3de8147842788ca4572b06728b08"
-CLIENT_SECRET = "ffed6e5600e24157ada66d2dae3c1773"
+# กำหนด CLIENT_ID และ CLIENT_SECRET ของคุณ (กรุณาเก็บข้อมูลนี้เป็นความลับ)
+CLIENT_ID = "your_spotify_client_id"
+CLIENT_SECRET = "your_spotify_client_secret"
 
 # สร้างไดเรกทอรี 'data' หากยังไม่มี
 if not os.path.exists('data'):
     os.makedirs('data')
 
-# โหลดข้อมูลเพลงจากไฟล์ CSV
-music_df = pd.read_csv('your_music_data.csv')
+# **โหลด DataFrame จากไฟล์ 'df.pkl'**
+music_df = pd.read_pickle('C:/JN/data/df.pkl')
 
-# **ตรวจสอบคอลัมน์ที่มีอยู่**
-print("คอลัมน์ที่มีอยู่ใน DataFrame:")
-print(music_df.columns)
-
-# **เลือกคอลัมน์คุณสมบัติที่ต้องการใช้**
-# แทนที่ด้วยชื่อคอลัมน์ของคุณ
-features = music_df[['tempo', 'energy', 'danceability']]
-
-# **จัดการกับคอลัมน์สตริง (ถ้ามี)**
-# ถ้าต้องการรวมคอลัมน์ 'genre'
-# features = pd.concat([features, music_df['genre']], axis=1)
-# features = pd.get_dummies(features, columns=['genre'])
-
-# **จัดการกับค่าที่หายไป**
-features = features.dropna()
-
-# **คำนวณเมทริกซ์ความคล้ายคลึง**
-similarity_matrix = cosine_similarity(features)
-
-# **บันทึก DataFrame และเมทริกซ์ความคล้ายคลึง**
-music_df.to_pickle('data/df.pkl')
-with open('data/similarity.pkl', 'wb') as f:
-    pickle.dump(similarity_matrix, f)
-
-# **โหลด DataFrame และเมทริกซ์ความคล้ายคลึง**
-music_df = pd.read_pickle('data/df.pkl')
-with open('data/similarity.pkl', 'rb') as f:
+# **โหลดเมทริกซ์ความคล้ายคลึงจากไฟล์ 'similarity.pkl'**
+with open('C:/JN/data/similarity.pkl', 'rb') as f:
     similarity_matrix = pickle.load(f)
 
+# **ตรวจสอบข้อมูล**
+print("แสดงข้อมูล 5 แถวแรกของ DataFrame:")
+print(music_df.head())
+print(f"\nขนาดของ DataFrame: {music_df.shape}")
+
 # **Initialize the Spotify client**
-client_credentials_manager = SpotifyClientCredentials(
-    client_id=CLIENT_ID, client_secret=CLIENT_SECRET
-)
+client_credentials_manager = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 def get_song_album_cover_url(song_name, artist_name):
