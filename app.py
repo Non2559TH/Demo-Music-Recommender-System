@@ -7,8 +7,8 @@ from spotipy.oauth2 import SpotifyClientCredentials
 import os
 
 # กำหนด CLIENT_ID และ CLIENT_SECRET ของคุณ (กรุณาเก็บข้อมูลนี้เป็นความลับ)
-CLIENT_ID = "your_spotify_client_id"
-CLIENT_SECRET = "your_spotify_client_secret"
+CLIENT_ID = "eb6a3de8147842788ca4572b06728b08"
+CLIENT_SECRET = "ffed6e5600e24157ada66d2dae3c1773"
 
 # สร้างไดเรกทอรี 'data' หากยังไม่มี
 if not os.path.exists('data'):
