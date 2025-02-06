@@ -5,8 +5,9 @@ import pickle
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import os
+from sklearn.metrics.pairwise import cosine_similarity
 
-# กำหนด CLIENT_ID และ CLIENT_SECRET ของคุณ (โปรดเก็บข้อมูลนี้เป็นความลับ)
+# กำหนด CLIENT_ID และ CLIENT_SECRET ของคุณ (กรุณาเก็บข้อมูลนี้เป็นความลับ)
 CLIENT_ID = "eb6a3de8147842788ca4572b06728b08"
 CLIENT_SECRET = "ffed6e5600e24157ada66d2dae3c1773"
 
@@ -14,33 +15,39 @@ CLIENT_SECRET = "ffed6e5600e24157ada66d2dae3c1773"
 if not os.path.exists('data'):
     os.makedirs('data')
 
-# ตรวจสอบและสร้างไฟล์ 'df.pkl' หากไม่มี
-if not os.path.exists('data/df.pkl'):
-    # สร้าง DataFrame ของเพลง (คุณสามารถแทนที่ด้วยข้อมูลของคุณเอง)
-    music_df = pd.DataFrame({
-        'song': ['Shape of You', 'Blinding Lights', 'Dance Monkey', 'Someone You Loved', 'Shallow'],
-        'artist': ['Ed Sheeran', 'The Weeknd', 'Tones and I', 'Lewis Capaldi', 'Lady Gaga']
-    })
-    # บันทึก DataFrame เป็นไฟล์ 'df.pkl'
-    music_df.to_pickle('data/df.pkl')
-else:
-    # โหลด DataFrame จากไฟล์ 'df.pkl'
-    music_df = pd.read_pickle('data/df.pkl')
+# **ส่วนที่คุณควรใส่โค้ดสำหรับนำเข้าชุดข้อมูลจาก CSV**
+# โหลดข้อมูลเพลงจากไฟล์ CSV
+music_df = pd.read_csv('spotify_millsongdata.csv')
+# บันทึก DataFrame เป็นไฟล์ 'df.pkl'
+music_df.to_pickle('data/df.pkl')
 
-# ตรวจสอบและสร้างไฟล์ 'similarity.pkl' หากไม่มี
-if not os.path.exists('data/similarity.pkl'):
-    # สร้างเมทริกซ์ความคล้ายคลึง (ในกรณีจริงควรคำนวณจากคุณสมบัติของเพลง)
-    similarity_matrix = np.random.rand(len(music_df), len(music_df))
-    # บันทึกเมทริกซ์ความคล้ายคลึงเป็นไฟล์ 'similarity.pkl'
-    with open('data/similarity.pkl', 'wb') as f:
-        pickle.dump(similarity_matrix, f)
-else:
-    # โหลดเมทริกซ์ความคล้ายคลึงจากไฟล์ 'similarity.pkl'
-    with open('data/similarity.pkl', 'rb') as f:
-        similarity_matrix = pickle.load(f)
+# **ส่วนที่คุณควรใส่โค้ดสำหรับคำนวณเมทริกซ์ความคล้ายคลึง**
+from sklearn.metrics.pairwise import cosine_similarity
+
+# เลือกคอลัมน์คุณสมบัติของเพลง
+# แทนที่ด้วยชื่อคอลัมน์ของคุณ
+features = music_df[['feature1', 'feature2', 'feature3']]
+
+# หากคอลัมน์คุณสมบัติเป็นสตริง ต้องแปลงเป็นตัวเลขก่อน
+# ตัวอย่างการใช้ One-Hot Encoding
+# features = pd.get_dummies(features)
+
+# คำนวณเมทริกซ์ความคล้ายคลึง
+similarity_matrix = cosine_similarity(features)
+
+# บันทึกเมทริกซ์ความคล้ายคลึงเป็นไฟล์ 'similarity.pkl'
+with open('data/similarity.pkl', 'wb') as f:
+    pickle.dump(similarity_matrix, f)
+
+# โหลด DataFrame และเมทริกซ์ความคล้ายคลึง
+music_df = pd.read_pickle('data/df.pkl')
+with open('data/similarity.pkl', 'rb') as f:
+    similarity_matrix = pickle.load(f)
 
 # Initialize the Spotify client
-client_credentials_manager = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
+client_credentials_manager = SpotifyClientCredentials(
+    client_id=CLIENT_ID, client_secret=CLIENT_SECRET
+)
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 def get_song_album_cover_url(song_name, artist_name):
